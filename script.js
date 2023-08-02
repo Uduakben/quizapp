@@ -1,45 +1,122 @@
-const notesContainer = document.querySelector(".note-container");
-const createBtn = document.querySelector(".create-note");
-let notes = document.querySelectorAll(".input-box")
+const questions = [
+    {
+        question: 'Which is the largest animal in the world?',
+        answers: [
+            { text: "Shark", correct: false},
+            { text: "Blue Whale", correct: true},
+            { text: "Elephant", correct: false},
+            { text: "Lion", correct: false},
 
-function showNotes(){
-    notesContainer.innerHTML = localStorage.getItem("notes");
+        ]
+    },
+    {
+        question: 'Which is the largest animal in the world?',
+        answers: [
+            { text: "Shark", correct: false},
+            { text: "Blue Whale", correct: true},
+            { text: "Elephant", correct: false},
+            { text: "Lion", correct: false},
+
+        ]
+    },
+    {
+        question: 'Which is the largest animal in the world?',
+        answers: [
+            { text: "Shark", correct: false},
+            { text: "Blue Whale", correct: true},
+            { text: "Elephant", correct: false},
+            { text: "Lion", correct: false},
+
+        ]
+    }
+];
+
+const questionElement = document.getElementById("question");
+let answerButton = document.getElementById("answer-buttons");
+const nextButton = document.getElementById("next-btn");
+
+let currentQuestionIndex = 0;
+let score = 0;
+
+function startQuiz(){
+    currentQuestionIndex = 0;
+    score = 0;
+    nextButton.innerHTML = "Next";
+    showQuestion();
 }
-showNotes();
 
-function updateStorage(){
-    localStorage.setItem("notes", notesContainer.innerHTML);
+function showQuestion(){
+    resetState();
+    let currentQuestion = questions[currentQuestionIndex];
+    let questionNo = currentQuestionIndex + 1;
+    questionElement.innerHTML = questionNo + ". " + currentQuestion.
+    question;
 
+    currentQuestion.answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.innerHTML = answer.text;
+        button.classList.add("btn");
+        answerButton.appendChild(button);
+        if(answer.correct){
+            button.dataset.correct = answer.correct;
+        }
+        button.addEventListener("click", selectAnswer)
+    });
 }
 
 
-createBtn.addEventListener("click", ()=>{
-    let inputBox = document.createElement("p");
-    let img = document.createElement("img");
-    inputBox.className = "input-box";
-    inputBox.setAttribute("contenteditable", "true");
-    img.src = "images/deleteicon2.png"
-    notesContainer.appendChild(inputBox).appendChild(img)
+function resetState(){
+    nextButton.style.display = "none";
+    while(answerButton.firstChild){
+        answerButton.removeChild(answerButton.firstChild)
+    }
+}
+
+function selectAnswer(e){
+    const selectedBtn = e.target;
+    const isCorrect = selectedBtn.dataset.correct === "true";
+    if(isCorrect){
+        selectedBtn.classList.add("correct");
+        score++;
+    }else{
+        selectedBtn.classList.add('incorrect')
+    }
+    Array.from(answerButton.children).forEach(button => {
+        if(button.dataset.correct === "true"){
+            button.classList.add("correct");
+        }
+        button.disabled = true;
+    })
+    nextButton.style.display ="block"
+}
+
+function showScore(){
+    resetState();
+    questionElement.innerHTML = `You score ${score} our of ${questions.length}!`;
+    nextButton.innerHTML = "Play Again";
+    nextButton.style.display = "block";
+}
+
+function handleNextButton(){
+    currentQuestionIndex++;
+    if(currentQuestionIndex < questions.length){
+        showQuestion();
+    }else{
+        showScore();
+    }
+}
+
+
+nextButton.addEventListener("click", ()=>{
+    if(currentQuestionIndex < questions.length){
+        handleNextButton();
+    }else{
+        startQuiz();
+    }
 })
 
-notesContainer.addEventListener("click", function(e){
-    if(e.target.tagName === "IMG"){
-        e.target.parentElement.remove();
-        updateStorage();
-    }
-    else if(e.target.tagName === "P"){
-        notes = document.querySelectorAll(".input-box");
-        notes.forEach(nt => {
-            nt.onkeyup = function(){
-                updateStorage();
-            }
-        })
-    }
-})
 
-document.addEventListener("keydown", event =>{
-    if(event.key === "Enter"){
-        document.execCommand("insertLineBreak");
-        event.preventDefault();
-    }
-})
+
+
+startQuiz();
+
